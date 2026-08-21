@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #d4fa5c;
+  --dark: #102a27;
+}
+
+* {
+  scrollbar-color: #1e3d39 #0b1e1c;
+}
+
+.glass {
+  background: rgba(19, 46, 43, 0.55);
+  border: 1px solid rgba(212, 250, 92, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.btn-primary {
+  @apply bg-primary text-dark font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition;
+}
+
+.btn-secondary {
+  @apply border border-border text-white/90 font-medium px-5 py-2.5 rounded-full hover:bg-white/5 transition;
+}
+
+.input-field {
+  @apply w-full bg-panel border border-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-muted/60 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

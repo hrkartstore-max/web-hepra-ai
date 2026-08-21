@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  SHOPIFY
+  WORDPRESS
+  PHP
+}
+
+enum GenerationStatus {
+  QUEUED
+  RUNNING
+  VALIDATING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  passwordHash String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  projects     Project[]
+}
+
+model Project {
+  id                 String       @id @default(cuid())
+  userId             String
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String
+  description        String
+  targetAudience     String?
+  brandStyle         String?
+  requiredPages      String?
+  features           String?
+  platform           Platform
+  activeVersionId    String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  generations        Generation[]
+  versions           Version[]
+  referenceImages    ReferenceImage[]
+
+  @@index([userId])
+}
+
+model ReferenceImage {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filename  String
+  mimeType  String
+  size      Int
+  data      String   // base64-encoded image data (STORAGE_MODE=database)
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Generation {
+  id           String           @id @default(cuid())
+  projectId    String
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  prompt       String
+  status       GenerationStatus @default(QUEUED)
+  errorMessage String?
+  versionId    String?
+  startedAt    DateTime         @default(now())
+  completedAt  DateTime?
+
+  @@index([projectId])
+}
+
+model Version {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  generationId  String?
+  createdAt     DateTime @default(now())
+  files         ProjectFile[]
+
+  @@index([projectId])
+  @@unique([projectId, versionNumber])
+}
+
+model ProjectFile {
+  id        String   @id @default(cuid())
+  versionId String
+  version   Version  @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  path      String
+  content   String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([versionId])
+  @@unique([versionId, path])
+}
